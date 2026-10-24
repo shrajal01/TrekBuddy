@@ -1,12 +1,12 @@
 /**
  * TrekBuddy – Your Indian Trek Guide
  * Frontend JavaScript Client
- * Integrates directly with FastAPI backend on http://127.0.0.1:8080/api/chat
+ * Integrates directly with FastAPI backend on https://trekbuddy-vip1.onrender.com/api/chat
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   // Backend Endpoints
-  const API_BASE = "http://127.0.0.1:8080";
+  const API_BASE = "https://trekbuddy-vip1.onrender.com";
   const CHAT_ENDPOINT = `${API_BASE}/api/chat`;
   const RESET_ENDPOINT = `${API_BASE}/api`;
 
@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       removeLoadingIndicator();
       console.error("Chatbot request error:", err);
 
-      let friendlyMsg = "Unable to connect to TrekBuddy backend. Please ensure your FastAPI server is running on http://127.0.0.1:8080.";
+      let friendlyMsg = "Unable to connect to TrekBuddy backend. Please ensure the server is available at https://trekbuddy-vip1.onrender.com.";
       if (err.message && !err.message.includes("Failed to fetch") && !err.message.includes("NetworkError")) {
         friendlyMsg = `Backend Error: ${err.message}`;
       }

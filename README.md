@@ -1,8 +1,12 @@
 # TrekBuddy — Your Indian Trek Guide
 
-TrekBuddy is an AI-powered conversational guide designed to help outdoor enthusiasts and beginners plan treks across India. Whether you are preparing for high-altitude Himalayan passes or exploring trails in the Western Ghats, TrekBuddy provides practical advice on trek difficulty, estimated budgets, optimal seasons, sample itineraries, gear checklists, and high-altitude mountain safety.
+TrekBuddy is an AI-powered conversational guide designed to help outdoor enthusiasts and beginners plan treks across India. Whether you are preparing for high-altitude Himalayan passes or exploring trails in the Western Ghats and Sahyadris, TrekBuddy provides practical advice on trek difficulty, estimated budgets, optimal seasons, sample itineraries, gear checklists, and mountain safety.
 
 The project features a **FastAPI** backend integrated with an OpenAI LLM, paired with a lightweight, responsive **Vanilla HTML, CSS, and JavaScript** frontend.
+
+- **Live Frontend**: [https://trekbuddy-26.netlify.app](https://trekbuddy-26.netlify.app)
+- **Live Backend API**: [https://trekbuddy-vip1.onrender.com](https://trekbuddy-vip1.onrender.com)
+- **Live Interactive API Docs**: [https://trekbuddy-vip1.onrender.com/docs](https://trekbuddy-vip1.onrender.com/docs)
 
 ---
 
@@ -10,11 +14,11 @@ The project features a **FastAPI** backend integrated with an OpenAI LLM, paired
 
 - **Indian Trek Guidance**: Covers difficulty ratings, elevation profiles, expense breakdowns, best weather windows, packing lists, and AMS (Acute Mountain Sickness) safety precautions.
 - **Trekking-Inspired Dark Theme UI**: Styled with dark charcoal/black tones, an atmospheric Himalayan mountain background, a subtle dark overlay for readability, and muted forest/mountain green accents.
-- **Plain-Text Conversational API**: Accepts plain-text messages and streams back plain-text guidance via `fetch()`.
+- **Plain-Text Conversational API**: Accepts plain-text messages and returns plain-text guidance via `fetch()`.
 - **In-Memory Chat History**: Retains multi-turn conversation context across interactions using backend concurrency locks.
 - **Interactive Suggestions**: Quick starter chips for popular queries (e.g., Kedarkantha, Hampta Pass, winter packing lists, and AMS safety).
 - **Responsive Layout**: Designed for seamless viewing across mobile and desktop screens without heavy CSS frameworks.
-- **Loading & Error Handling**: Displays a real-time thinking indicator and clear diagnostic error messages if the backend is unavailable.
+- **Loading & Error Handling**: Displays a real-time thinking indicator (`"TrekBuddy is thinking..."`) and diagnostic error messages if the backend is unavailable.
 - **Chat Reset**: Single-click reset button that clears both the frontend chat area and the backend conversation state (`DELETE /api`).
 - **Zero Build Tooling**: Frontend runs directly in the browser or via a simple static file server without Webpack, Vite, Node.js, or npm.
 
@@ -40,9 +44,9 @@ The project features a **FastAPI** backend integrated with an OpenAI LLM, paired
 ## Project Structure
 
 ```text
-pythondemo/
+.
 ├── .env.example          # Environment variable template
-├── .gitignore            # Git ignore file for secrets and environments
+├── .gitignore            # Git ignore file for secrets and virtualenvs
 ├── requirements.txt      # Python dependencies
 ├── README.md             # Project documentation
 ├── app/
@@ -64,21 +68,16 @@ pythondemo/
 
 - **Python 3.10 or higher** (Python 3.13 recommended)
 - **OpenAI API Key** with access to chat/responses models
-- **Windows PowerShell** (or any modern terminal on macOS/Linux)
+- **Windows PowerShell** (or bash/zsh on macOS/Linux)
 - A modern web browser (Chrome, Edge, Firefox, Safari)
 
 ---
 
 ## Local Setup and Installation
 
-Follow these steps using Windows PowerShell:
+Assuming you have opened your terminal in the project root:
 
-### 1. Clone or Open the Repository
-```powershell
-cd d:\pythondemo
-```
-
-### 2. Create and Activate a Virtual Environment
+### 1. Create and Activate a Virtual Environment
 ```powershell
 # Create virtual environment
 python -m venv .venv
@@ -91,18 +90,18 @@ python -m venv .venv
 > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 > ```
 
-### 3. Install Dependencies
+### 2. Install Dependencies
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-Copy the example environment file and add your secret API key:
+### 3. Configure Environment Variables
+Copy the example environment template and add your secret API key:
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Open `.env` in a text editor and fill in your OpenAI API credentials:
+Open `.env` in your editor and set your OpenAI API credentials:
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_MODEL=gpt-6-luna
@@ -110,27 +109,25 @@ OPENAI_MODEL=gpt-6-luna
 
 ---
 
-## Running the Application
+## Running the Application Locally
 
-Run the backend and frontend in separate PowerShell terminals.
+Run the backend and frontend in separate terminals from the project root.
 
 ### Terminal 1: Start the FastAPI Backend
 ```powershell
-cd d:\pythondemo
 .\.venv\Scripts\Activate.ps1
-uvicorn app.main:app --port 8080 --reload
+uvicorn app.main:app --reload --port 8080
 ```
-- **Backend API**: `http://127.0.0.1:8080`
-- **Interactive Swagger Docs**: `http://127.0.0.1:8080/docs`
-- **ReDoc Documentation**: `http://127.0.0.1:8080/redoc`
+- **Local API Endpoint**: `http://127.0.0.1:8080`
+- **Local Interactive Docs**: `http://127.0.0.1:8080/docs`
+- **Local ReDoc**: `http://127.0.0.1:8080/redoc`
 
 ### Terminal 2: Start the Frontend Server
-Use Python's built-in HTTP server to serve the `frontend/` directory:
+Serve the `frontend/` directory using Python's built-in HTTP server:
 ```powershell
-cd d:\pythondemo
-.\.venv\Scripts\python.exe -m http.server 3000 --directory frontend
+python -m http.server 3000 --directory frontend
 ```
-- **Frontend URL**: `http://localhost:3000`
+- **Local Frontend URL**: `http://localhost:3000`
 
 *(Alternatively, you can open `frontend/index.html` directly in your browser.)*
 
@@ -141,14 +138,15 @@ cd d:\pythondemo
 ### 1. Conversational Chat
 Sends a message to TrekBuddy and receives guidance formatted as plain text.
 
-- **URL**: `/api/chat`
+- **Live URL**: `https://trekbuddy-vip1.onrender.com/api/chat`
+- **Local URL**: `http://127.0.0.1:8080/api/chat`
 - **Method**: `POST`
 - **Content-Type**: `text/plain`
 - **Accept**: `text/plain`
 
-#### Example Request (PowerShell / curl)
+#### Example Request
 ```powershell
-curl -X POST "http://127.0.0.1:8080/api/chat" `
+curl -X POST "https://trekbuddy-vip1.onrender.com/api/chat" `
   -H "Content-Type: text/plain" `
   --data "What is the difficulty and best season for Kedarkantha trek?"
 ```
@@ -175,7 +173,8 @@ Kedarkantha is generally rated easy to moderate and is suitable for first-time H
 ### 2. Standalone LLM Generation
 Low-level single-prompt completion endpoint.
 
-- **URL**: `/api/generate`
+- **Live URL**: `https://trekbuddy-vip1.onrender.com/api/generate`
+- **Local URL**: `http://127.0.0.1:8080/api/generate`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 
@@ -205,7 +204,8 @@ Low-level single-prompt completion endpoint.
 ### 3. Clear Chat History
 Clears the current conversational memory buffer on the backend.
 
-- **URL**: `/api`
+- **Live URL**: `https://trekbuddy-vip1.onrender.com/api`
+- **Local URL**: `http://127.0.0.1:8080/api`
 - **Method**: `DELETE`
 - **Response**: `200 OK` (empty body)
 
@@ -222,24 +222,29 @@ Clears the current conversational memory buffer on the backend.
 
 ## Security Notes
 
-1. **Never commit `.env` to version control**: The `.env` file contains your private API credentials and is ignored by `.gitignore`.
+1. **Keep `.env` Private**: The `.env` file contains your private API credentials and must never be committed to Git. The repository includes `.gitignore` to prevent committing `.env`.
 2. **Backend API Key Isolation**: All LLM requests are processed on the FastAPI server. The OpenAI API key is never exposed to the frontend browser client.
-3. **CORS Configuration**: By default, `app/main.py` allows all origins (`allow_origins=["*"]`) for convenient local development. For production deployments, restrict this to your specific frontend domain.
+3. **CORS Configuration**: The backend explicitly allows the live frontend origin (`https://trekbuddy-26.netlify.app`) as well as local development ports, preventing unauthorized cross-origin requests while maintaining full functionality.
 
 ---
 
-## Deployment
+## Production Deployment
 
-### Backend (FastAPI)
-The backend can be containerized with Docker or deployed to platforms such as **Render**, **Railway**, **Fly.io**, or **AWS**:
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8080
-```
-- Ensure environment variables (`OPENAI_API_KEY`, `OPENAI_MODEL`) are configured in your host's dashboard.
+### Backend on Render
+- **Live URL**: `https://trekbuddy-vip1.onrender.com`
+- **Service Type**: Web Service (Python)
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**:
+  - `OPENAI_API_KEY`: Configured securely in the Render dashboard under Environment.
+  - `OPENAI_MODEL`: `gpt-6-luna`
 
-### Frontend (Static Site)
-Because the frontend uses vanilla HTML, CSS, and JS, it can be hosted on any static provider such as **GitHub Pages**, **Cloudflare Pages**, **Netlify**, or **Vercel**.
-- When deploying to production, update the `API_BASE` variable in [`frontend/app.js`](file:///d:/pythondemo/frontend/app.js) from `http://127.0.0.1:8080` to your deployed backend URL:
+### Frontend on Netlify
+- **Live URL**: `https://trekbuddy-26.netlify.app`
+- **Service Type**: Static Site
+- **Publish Directory**: `frontend`
+- **Build Command**: *None (pure static HTML/CSS/JS)*
+- The frontend connects directly to the production backend via `API_BASE` defined in [`frontend/app.js`](file:///frontend/app.js):
   ```javascript
-  const API_BASE = "https://your-backend-domain.com";
+  const API_BASE = "https://trekbuddy-vip1.onrender.com";
   ```
