@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TrekBuddy – Your Indian Trek Guide chatbot. Get guidance on Indian trek difficulty, estimated budget, duration, best seasons, itineraries, packing lists, and mountain safety.">
+  <title>TrekBuddy – Your Indian Trek Guide</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-branding">
+        <div class="brand-icon" aria-hidden="true">
+          <!-- Mountain & Pine SVG Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3l4 8 5-5 5 12H2L8 3z"/>
+            <path d="M4 18l4-5 3 3 4-6 5 8"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">TrekBuddy</h1>
+          <p class="brand-subtitle">Your Indian Trek Guide</p>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="status-badge" id="statusBadge" title="Backend connection target: http://127.0.0.1:8080">
+          <span class="status-dot"></span>
+          <span class="status-label">FastAPI 8080</span>
+        </div>
+        <button type="button" id="clearBtn" class="clear-btn" title="Reset chat history" aria-label="Reset chat history">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+          <span>Reset</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error Banner for Connection Warnings -->
+    <div id="errorBanner" class="error-banner" role="alert" hidden>
+      <span class="error-icon">⚠️</span>
+      <span id="errorMessage" class="error-text">Backend is unavailable.</span>
+      <button type="button" id="dismissError" class="dismiss-btn" aria-label="Dismiss error">×</button>
+    </div>
+
+    <!-- Main Chat Window -->
+    <main class="chat-wrapper">
+      <div id="chatMessages" class="chat-messages" role="log" aria-live="polite">
+        
+        <!-- Welcome Message from TrekBuddy -->
+        <div class="message-row assistant">
+          <div class="avatar assistant-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 20h18L12 4 3 20z"/>
+            </svg>
+          </div>
+          <div class="message-bubble">
+            <div class="message-sender">TrekBuddy</div>
+            <div class="message-content">
+              <p><strong>Namaste! 🙏 Welcome to TrekBuddy – Your Indian Trek Guide.</strong></p>
+              <p>Planning an adventure across the Himalayas, Western Ghats, or Sahyadris? I'm here to help you with:</p>
+              <ul>
+                <li><strong>Trek Difficulty & Elevation Profiles</strong> – beginner, moderate, or challenging routes</li>
+                <li><strong>Estimated Budgets & Costs</strong> – permits, guides, gear, and travel</li>
+                <li><strong>Duration & Itineraries</strong> – day-wise trail plans</li>
+                <li><strong>Best Season & Timing</strong> – ideal months and seasonal highlights</li>
+                <li><strong>Packing Lists & Gear</strong> – clothing layers, footwear, and essentials</li>
+                <li><strong>High-Altitude Safety</strong> – AMS prevention and acclimatization</li>
+              </ul>
+              <p class="disclaimer-note"><em>Note: TrekBuddy provides planning advice. Always verify live weather and current trail conditions with local forest authorities and certified trek operators before embarking.</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick suggestion chips -->
+        <div class="suggestions-container" id="suggestionsContainer">
+          <span class="suggestions-label">Try asking:</span>
+          <div class="suggestion-chips">
+            <button type="button" class="chip" data-prompt="What is the difficulty and estimated budget for the Kedarkantha Trek?">Kedarkantha difficulty & budget</button>
+            <button type="button" class="chip" data-prompt="What is the best season and duration for the Hampta Pass trek?">Hampta Pass best season</button>
+            <button type="button" class="chip" data-prompt="Give me a comprehensive packing list for a Himalayan winter trek.">Himalayan winter packing list</button>
+            <button type="button" class="chip" data-prompt="What safety precautions and AMS symptoms should I know for high-altitude treks?">AMS & high-altitude safety</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer Input Bar -->
+    <footer class="chat-footer">
+      <form id="chatForm" class="chat-form" novalidate>
+        <div class="input-container">
+          <textarea 
+            id="messageInput" 
+            class="message-input" 
+            placeholder="Ask about Indian treks, difficulty, budget, itineraries, or safety..." 
+            rows="1" 
+            maxlength="2000"
+            aria-label="Type your message"></textarea>
+          <button type="submit" id="sendBtn" class="send-btn" aria-label="Send message">
+            <span>Send</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+      <div class="input-hint">
+        <span>Press <strong>Enter</strong> to send &bull; <strong>Shift + Enter</strong> for a new line</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
