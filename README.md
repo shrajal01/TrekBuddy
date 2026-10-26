@@ -13,12 +13,12 @@ The project features a **FastAPI** backend integrated with an OpenAI LLM, paired
 ## Features
 
 - **Indian Trek Guidance**: Covers difficulty ratings, elevation profiles, expense breakdowns, best weather windows, packing lists, and AMS (Acute Mountain Sickness) safety precautions.
+- **ChatGPT-Style Streaming Responses**: Real-time token streaming from OpenAI's Responses API progressively updates a single assistant message bubble as chunks arrive.
 - **Trekking-Inspired Dark Theme UI**: Styled with dark charcoal/black tones, an atmospheric Himalayan mountain background, a subtle dark overlay for readability, and muted forest/mountain green accents.
-- **Plain-Text Conversational API**: Accepts plain-text messages and returns plain-text guidance via `fetch()`.
-- **In-Memory Chat History**: Retains multi-turn conversation context across interactions using backend concurrency locks.
+- **Smart Automatic Scrolling**: Keeps the latest streaming content in view without expensive animation stutter, while preserving user scroll position when intentionally scrolling up to read earlier replies.
+- **Concurrency-Safe Conversation History**: Retains multi-turn conversation context across interactions using backend concurrency locks, ensuring failed or interrupted streams do not corrupt state.
 - **Interactive Suggestions**: Quick starter chips for popular queries (e.g., Kedarkantha, Hampta Pass, winter packing lists, and AMS safety).
-- **Responsive Layout**: Designed for seamless viewing across mobile and desktop screens without heavy CSS frameworks.
-- **Loading & Error Handling**: Displays a real-time thinking indicator (`"TrekBuddy is thinking..."`) and diagnostic error messages if the backend is unavailable.
+- **Responsive Layout**: Designed for seamless viewing across mobile and desktop screens without heavy CSS frameworks. Header and input bar remain fixed while the chat messages area scrolls.
 - **Chat Reset**: Single-click reset button that clears both the frontend chat area and the backend conversation state (`DELETE /api`).
 - **Zero Build Tooling**: Frontend runs directly in the browser or via a simple static file server without Webpack, Vite, Node.js, or npm.
 
@@ -131,27 +131,36 @@ python -m http.server 3000 --directory frontend
 
 *(Alternatively, you can open `frontend/index.html` directly in your browser.)*
 
+### Terminal 3: Run Automated Tests
+Run the pytest test suite to verify streaming, concurrency lock, empty message validation, and history reset:
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests -v
+```
+
 ---
 
 ## API Documentation
 
-### 1. Conversational Chat
-Sends a message to TrekBuddy and receives guidance formatted as plain text.
+### 1. Conversational Chat (Streaming)
+Sends a plain-text prompt to TrekBuddy and receives a real-time streamed response chunk-by-chunk directly from the OpenAI Responses API.
 
 - **Live URL**: `https://trekbuddy-vip1.onrender.com/api/chat`
 - **Local URL**: `http://127.0.0.1:8080/api/chat`
 - **Method**: `POST`
 - **Content-Type**: `text/plain`
 - **Accept**: `text/plain`
+- **Response Format**: `StreamingResponse` (`text/plain; charset=utf-8`) with `Transfer-Encoding: chunked` and `X-Accel-Buffering: no`
 
 #### Example Request
 ```powershell
-curl -X POST "https://trekbuddy-vip1.onrender.com/api/chat" `
+curl -N -X POST "http://127.0.0.1:8080/api/chat" `
   -H "Content-Type: text/plain" `
   --data "What is the difficulty and best season for Kedarkantha trek?"
 ```
+*(Use `-N` or `--no-buffer` with curl to see tokens stream to the terminal in real time).*
 
-#### Example Response (`200 OK`)
+#### Example Streamed Response (`200 OK`)
+Chunks are progressively emitted as text deltas:
 ```text
 Kedarkantha is generally rated easy to moderate and is suitable for first-time Himalayan trekkers with basic fitness.
 
@@ -161,7 +170,16 @@ Kedarkantha is generally rated easy to moderate and is suitable for first-time H
 ...
 ```
 
+#### Error Response (`400 Bad Request`)
+Returned if the request body is empty:
+```json
+{
+  "detail": "Message cannot be empty."
+}
+```
+
 #### Error Response (`502 Bad Gateway`)
+Returned if OpenAI stream initialization fails:
 ```json
 {
   "detail": "Unable to process your message."

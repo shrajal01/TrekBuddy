@@ -5,7 +5,7 @@ import logging
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
@@ -35,6 +35,7 @@ app = FastAPI(title="TrekBuddy - Your Indian Trek Guide API")
 
 origins = [
     "https://trekbuddy-26.netlify.app",
+    "https://trekbuddy-26.netlify.app/",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "*",
@@ -60,39 +61,80 @@ class GenerateRequest(BaseModel):
     input: str
 
 
-@app.post("/api/chat", response_class=PlainTextResponse)
+@app.post("/api/chat")
 async def chat(
-    message: str = Body(..., media_type="text/plain")
-) -> str:
-    async with history_lock:
-        history.append({"role": "user", "content": message})
+    message: str = Body("", media_type="text/plain")
+):
+    cleaned_message = message.strip()
+    if not cleaned_message:
+        raise HTTPException(
+            status_code=400,
+            detail="Message cannot be empty.",
+        )
 
-        try:
-            response = await client.responses.create(
-                model=model,
-                instructions=SYSTEM_PROMPT,
-                input=history,
-                store=False,
-            )
+    await history_lock.acquire()
+    try:
+        history.append({"role": "user", "content": cleaned_message})
 
-            answer = response.output_text
-
-            if not answer:
-                raise RuntimeError("Empty response from model")
-
-            history.append(
-                {"role": "assistant", "content": answer}
-            )
-            return answer
-
-        except Exception:
-            # Remove the unanswered user message if the request fails.
+        stream = await client.responses.create(
+            model=model,
+            instructions=SYSTEM_PROMPT,
+            input=list(history),
+            store=False,
+            stream=True,
+        )
+    except Exception:
+        # If initialization fails, remove the unanswered user message and release lock
+        if history and history[-1]["role"] == "user" and history[-1]["content"] == cleaned_message:
             history.pop()
-            logger.exception("Chat request failed")
-            raise HTTPException(
-                status_code=502,
-                detail="Unable to process your message.",
-            )
+        history_lock.release()
+        logger.exception("Failed to initialize chat stream")
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to process your message.",
+        )
+
+    async def stream_generator():
+        accumulated_chunks: list[str] = []
+        completed_successfully = False
+        try:
+            async for event in stream:
+                if event.type == "response.output_text.delta":
+                    delta = getattr(event, "delta", None)
+                    if delta:
+                        accumulated_chunks.append(delta)
+                        yield delta
+                elif event.type == "error":
+                    logger.error("OpenAI error event during streaming: %s", event)
+                    raise RuntimeError("Error event from OpenAI streaming")
+
+            full_response = "".join(accumulated_chunks).strip()
+            if not full_response:
+                raise RuntimeError("Empty response received from model")
+
+            history.append({"role": "assistant", "content": full_response})
+            completed_successfully = True
+
+        except BaseException as exc:
+            logger.exception("Chat streaming interrupted: %s", exc)
+            if not completed_successfully and history and history[-1]["role"] == "user" and history[-1]["content"] == cleaned_message:
+                history.pop()
+            raise
+        finally:
+            try:
+                await stream.close()
+            except Exception:
+                pass
+            history_lock.release()
+
+    return StreamingResponse(
+        stream_generator(),
+        media_type="text/plain; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.post("/api/generate")
